@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import PlaceMap from "./place-map";
 import {
   ArrowUpRight,
   ArrowRight,
@@ -358,7 +359,7 @@ export default function Finder({ initial }: { initial: Result }) {
             <p>
               {data.coordinateCount
                 ? `${data.coordinateCount.toLocaleString()} units have verified coordinates. Nearby results include only mapped units; other units remain searchable manually.`
-                : "Location coverage is incomplete. This snapshot has no verified coordinates; units are searchable by their published location descriptions."}
+                : "Open a unit in List view to look up its location on Google Maps. Verified coordinates for nearby-distance rankings are not available yet."}
             </p>
           </div>
           {error ? (
@@ -512,6 +513,25 @@ export default function Finder({ initial }: { initial: Result }) {
             <span className="eyebrow">POLLING UNIT</span>
             <h2>{title(unit.name)}</h2>
             <span className="code">{unit.code}</span>
+            <section className="detail-map" aria-label="Polling unit map">
+              <h3>Explore the location</h3>
+              <p className="detail-note">
+                {unit.coordinates
+                  ? "Pan and zoom to explore this polling unit without leaving the app."
+                  : "Look up the published location on Google Maps without leaving the app."}
+              </p>
+              {unit.coordinates ? (
+                <UnitMap
+                  key={unit.code}
+                  units={[unit]}
+                  origin={null}
+                  onSelect={setUnit}
+                  detail
+                />
+              ) : (
+                <PlaceMap key={unit.code} unit={unit} />
+              )}
+            </section>
             <dl>
               {[
                 ["State", unit.state],

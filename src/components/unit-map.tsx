@@ -18,12 +18,16 @@ function Bounds({
 }) {
   const map = useMap();
   useEffect(() => {
+    map.invalidateSize();
     const points = units
       .filter((u) => u.coordinates)
       .map((u) => [u.coordinates!.lat, u.coordinates!.lng] as [number, number]);
     if (origin) points.push([origin.lat, origin.lng]);
-    if (points.length)
+    if (points.length) {
       map.fitBounds(points, { maxZoom: 15, padding: [35, 35] });
+    } else {
+      map.setView([9.08, 8.67], 6);
+    }
   }, [units, origin, map]);
   return null;
 }
@@ -31,17 +35,20 @@ export default function UnitMap({
   units,
   origin,
   onSelect,
+  detail = false,
 }: {
   units: Unit[];
   origin: { lat: number; lng: number } | null;
   onSelect: (u: Unit) => void;
+  detail?: boolean;
 }) {
   const [tileError, setTileError] = useState(false);
   return (
-    <div className="map-wrap">
+    <div className="map-wrap" role="region" aria-label={detail ? "Interactive polling unit location map" : "Interactive polling unit directory map"}>
       <MapContainer
         center={[9.08, 8.67]}
         zoom={6}
+        scrollWheelZoom={false}
         style={{ height: "100%", width: "100%" }}
       >
         <TileLayer
@@ -73,20 +80,19 @@ export default function UnitMap({
                 <br />
                 {u.code}
                 <br />
-                <button onClick={() => onSelect(u)}>View details</button>
+                {!detail && <button onClick={() => onSelect(u)}>View details</button>}
               </Popup>
             </CircleMarker>
           ))}
       </MapContainer>
       {tileError && (
         <p className="map-notice">
-          Map tiles could not load. Switch to list view to keep searching.
+          {detail ? "Map tiles could not load. The published location is available above." : "Map tiles could not load. Switch to list view to keep searching."}
         </p>
       )}
       {!units.some((u) => u.coordinates) && (
         <p className="map-notice">
-          No verified polling-unit coordinates in these results. All units
-          remain available in list view.
+          {detail ? "Overview only · exact polling-unit location unavailable" : "No verified polling-unit coordinates in these results. Switch to List to browse units."}
         </p>
       )}
     </div>

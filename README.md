@@ -53,3 +53,9 @@ Location is requested on button click, stored only in component memory and sent 
 The implementation plan and research decisions are in `IMPLEMENTATION_PLAN.md`.
 
 Production dependency audit: zero reported vulnerabilities at setup. Five high-severity audit entries remain in the development-only eslint-config-next → fast-glob → micromatch → braces chain; npm proposes an incompatible Next.js lint-config downgrade rather than a compatible patch. Do not use automated forced downgrades. Recheck when compatible fixes are published.
+
+## On-demand Google Maps location lookup
+
+Opening an unmapped unit now embeds a Google Maps search for its published location, LGA, state and Nigeria. Users can edit the search phrase to improve a match. Google receives that search and iframe requests; user GPS is not sent by this component. The embedded result is labeled as a place-search match, not an INEC-verified pin. No latitude/longitude is extracted, scraped, or written into the verified overlay. Nearby-distance ranking still requires coordinate data. Google availability and place matching vary. External directions remain available if embedded maps fail.
+
+The keyless public map-search embed is used for immediate interactive lookup, rather than the key-based Maps Embed API. For a documented production API integration, configure a Google Maps Embed API key and use its supported place mode. For actual coordinate values and cached nearby results, a separate server-side geocoding provider with suitable usage/storage terms is needed.
